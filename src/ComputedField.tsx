@@ -55,7 +55,7 @@ const validateConfiguration = (options: SanityType['options']) => {
     throw new Error(`ComputedField: options required. See '${help}'`)
   } else {
     let missingKeys = []
-    if (!options.ancestorDepth && options.ancestorDept !== 0) {
+    if (!options.ancestorDepth && options.ancestorDepth !== 0) {
       missingKeys.push('ancestorDepth')
     } else if (options.ancestorDepth > 0) {
       throw new Error(`ComputedField: options invalid. options.ancestorDepth must be <= 0.`)
