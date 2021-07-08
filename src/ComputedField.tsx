@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {withDocument} from 'part:@sanity/form-builder'
+import {withValuePath, withDocument} from 'part:@sanity/form-builder'
 import {
   TextInput,
   Button,
@@ -18,7 +18,8 @@ import DefaultFormField from 'part:@sanity/components/formfields/default'
 // import styles from './ComputedField.css'
 import PatchEvent, {set, unset} from 'part:@sanity/form-builder/patch-event'
 
-import client from 'part:@sanity/base/client'
+//TODO: fix import typing
+import recomputeHelpers from './recompute.js'
 type SanityType = {
   _type?: string
   title: string
@@ -27,8 +28,9 @@ type SanityType = {
   options: {
     buttonText?: string
     editable?: boolean
-    documentQuerySelection: string
-    reduceQueryResult: (queryResult: {[s: string]: any}) => number | string | null
+    ancestorDepth: number
+    //TODO: fix type signature
+    recomputeHandler: (result: {[s: string]: any}) => number | string | null
     [s: string]: any
   }
 }
@@ -46,18 +48,23 @@ export type SanityProps = {
 }
 
 const validateConfiguration = (options: SanityType['options']) => {
-  const help = 'https://github.com/wildseansy/sanity-plugin-computed-field#readme'
+  // const help = 'https://github.com/wildseansy/sanity-plugin-computed-field#readme'
+  // TODO: update README
+  const help = 'jk, I still need to modify the documentation';
   if (!options) {
-    throw new Error(`ComputedField: options required. See ${help}`)
+    throw new Error(`ComputedField: options required. See '${help}'`)
   } else {
-    let breakingKey = null
-    if (!options.documentQuerySelection) {
-      breakingKey = 'documentQuerySelection'
-    } else if (!options.reduceQueryResult) {
-      breakingKey = 'reduceQueryResult'
+    let missingKeys = []
+    if (!options.ancestorDepth && options.ancestorDept !== 0) {
+      missingKeys.push('ancestorDepth')
+    } else if (options.ancestorDepth > 0) {
+      throw new Error(`ComputedField: options invalid. options.ancestorDepth must be <= 0.`);
     }
-    if (breakingKey) {
-      throw new Error(`ComputedField: options.${breakingKey} is required. Please follow ${help}`)
+    if (!options.recomputeHandler) {
+      missingKeys.push('recomputeHandler')
+    }
+    if (missingKeys.length > 0) {
+        throw new Error(`ComputedField: options incomplete. Please follow ${help}.${missingKeys.reduce((acc, cur) => { acc += `\n\toptions.${cur} is required`; return acc; }, '')}`);
     }
   }
 }
@@ -71,9 +78,10 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
     const {_id, _type}: SanityDocument = document
     const options = props.type.options
     validateConfiguration(options)
-    const reducer = React.useCallback(
-      (queryResult: {[s: string]: unknown}) => options.reduceQueryResult(queryResult),
-      [options.reduceQueryResult]
+    const handleRecompute = React.useCallback(
+      //TODO: fix type signature
+      (result: {[s: string]: unknown}) => options.recomputeHandler(result),
+      [options.recomputeHandler]
     )
     const handleChange = React.useCallback(
       (val: any) => {
@@ -92,29 +100,18 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
       (e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value),
       [handleChange]
     )
-    const generate = React.useCallback(() => {
-      const query = `*[_type == '${_type}' && _id == '${_id}' || _id == '${_id.replace(
-        'drafts.',
-        ''
-      )}'] {
-        _id,
-        ${options.documentQuerySelection}
-       }`
-      setLoading(true)
-      client.fetch(query).then((items: SanityDocument[]) => {
-        let record = items.find(({_id}) => _id.includes('drafts'))
-        if (!record) {
-          // No draft, use the original:
-          record = items[0]
-        }
-        const newValue = reducer(record)
-
-        if (newValue !== value) {
-          handleChange(newValue)
-        }
-        setLoading(false)
-      })
-    }, [handleChange, reducer, value, _id, _type])
+    const recompute = React.useCallback(async (_event, props) => {
+      setLoading(true);
+      const { ancestor, error, errorMsg } = recomputeHelpers.getAncestor(props, options.ancestorDepth)
+      if(error) {
+          throw new Error(errorMsg)
+      }
+      const newValue = handleRecompute(ancestor);
+      if (newValue !== value) {
+          handleChange(newValue);
+      }
+      setLoading(false);
+    }, [handleChange, handleRecompute, value, _id, _type]);
     let TextComponent = type.name === 'text' ? TextArea : TextInput
     return (
       <ThemeProvider theme={studioTheme}>
@@ -148,7 +145,7 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
             <Button
               mode="ghost"
               type="button"
-              onClick={generate}
+              onClick={(event: any) => recompute(event, props)}
               onFocus={onFocus}
               text={options.buttonText || 'Regenerate'}
             />
@@ -164,4 +161,4 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
   }
 )
 
-export default withDocument(ComputedField)
+export default withValuePath(withDocument(ComputedField))
