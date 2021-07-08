@@ -50,7 +50,7 @@ export type SanityProps = {
 const validateConfiguration = (options: SanityType['options']) => {
   // const help = 'https://github.com/wildseansy/sanity-plugin-computed-field#readme'
   // TODO: update README
-  const help = 'jk, I still need to modify the documentation';
+  const help = 'jk, I still need to modify the documentation'
   if (!options) {
     throw new Error(`ComputedField: options required. See '${help}'`)
   } else {
@@ -58,13 +58,21 @@ const validateConfiguration = (options: SanityType['options']) => {
     if (!options.ancestorDepth && options.ancestorDept !== 0) {
       missingKeys.push('ancestorDepth')
     } else if (options.ancestorDepth > 0) {
-      throw new Error(`ComputedField: options invalid. options.ancestorDepth must be <= 0.`);
+      throw new Error(`ComputedField: options invalid. options.ancestorDepth must be <= 0.`)
     }
     if (!options.recomputeHandler) {
       missingKeys.push('recomputeHandler')
     }
     if (missingKeys.length > 0) {
-        throw new Error(`ComputedField: options incomplete. Please follow ${help}.${missingKeys.reduce((acc, cur) => { acc += `\n\toptions.${cur} is required`; return acc; }, '')}`);
+      throw new Error(
+        `ComputedField: options incomplete. Please follow ${help}.${missingKeys.reduce(
+          (acc, cur) => {
+            acc += `\n\toptions.${cur} is required`
+            return acc
+          },
+          ''
+        )}`
+      )
     }
   }
 }
@@ -100,18 +108,24 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
       (e: React.ChangeEvent<HTMLInputElement>) => handleChange(e.target.value),
       [handleChange]
     )
-    const recompute = React.useCallback(async (_event, props) => {
-      setLoading(true);
-      const { ancestor, error, errorMsg } = recomputeHelpers.getAncestor(props, options.ancestorDepth)
-      if(error) {
+    const recompute = React.useCallback(
+      async (_event, props) => {
+        setLoading(true)
+        const {ancestor, error, errorMsg} = recomputeHelpers.getAncestor(
+          props,
+          options.ancestorDepth
+        )
+        if (error) {
           throw new Error(errorMsg)
-      }
-      const newValue = handleRecompute(ancestor);
-      if (newValue !== value) {
-          handleChange(newValue);
-      }
-      setLoading(false);
-    }, [handleChange, handleRecompute, value, _id, _type]);
+        }
+        const newValue = handleRecompute(ancestor)
+        if (newValue !== value) {
+          handleChange(newValue)
+        }
+        setLoading(false)
+      },
+      [handleChange, handleRecompute, value, _id, _type]
+    )
     let TextComponent = type.name === 'text' ? TextArea : TextInput
     return (
       <ThemeProvider theme={studioTheme}>

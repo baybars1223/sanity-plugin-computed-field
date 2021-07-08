@@ -3,10 +3,14 @@ const getAncestor = (props, depth) => {
   let wasSet = false
   let ancestor
   try {
-    const { ancestors, final } = getAncestors(props)
+    const {ancestors, final} = getAncestors(props)
     const ancestorIndex = ancestors.length - 1 + depth
-    if(ancestorIndex < 0 || ancestorIndex > ancestors.length - 1) {
-      throw new Error(`${ancestorIndex} is not a valid index for retrieved ancestors. Based on current node, index must be between 0 and ${ancestors.length - 1}`)
+    if (ancestorIndex < 0 || ancestorIndex > ancestors.length - 1) {
+      throw new Error(
+        `${ancestorIndex} is not a valid index for retrieved ancestors. Based on current node, index must be between 0 and ${
+          ancestors.length - 1
+        }`
+      )
     }
     ancestor = ancestors[ancestorIndex]
     wasSet = true
@@ -38,25 +42,25 @@ const getAncestors = (props) => {
   console.groupCollapsed('getAncenstors')
   console.log(`props:`)
   console.log(props)
-  let { document } = props
+  let {document} = props
   let pathParts = props.getValuePath()
 
   let current = document
   let ancestors = []
   console.groupCollapsed('Document Traversal')
-  for(let i = 0; i < pathParts.length; i += 1) {
+  for (let i = 0; i < pathParts.length; i += 1) {
     let part = pathParts[i]
     try {
       ancestors.push(current)
       // console.log(`tree length: ${ancestors.length}\ntree:`)
       // console.log(ancestors)
-      if(typeof(part) == 'string') {
+      if (typeof part == 'string') {
         current = current[part]
         continue
       }
 
-      if (typeof(part) == 'object') {
-        if(part._key && Array.isArray(current)) {
+      if (typeof part == 'object') {
+        if (part._key && Array.isArray(current)) {
           let found = current.find((e) => e._key == part._key)
           if (found === undefined) {
             console.log(`Failed to find part._key '${part._key}' in ${JSON.stringify(current)}`)
@@ -65,7 +69,7 @@ const getAncestors = (props) => {
           current = found
           continue
         }
-        if(part._id && Array.isArray(current)) {
+        if (part._id && Array.isArray(current)) {
           let found = current.find((e) => e._id == part._id)
           if (found === undefined) {
             console.log(`Failed to find part._id '${part._id}' in ${JSON.stringify(current)}`)
@@ -76,7 +80,11 @@ const getAncestors = (props) => {
         }
       }
 
-      console.log(`Failed to process path part.\nPart Type: ${typeof(part)}\nPart Value: ${JSON.stringify(part)}`)
+      console.log(
+        `Failed to process path part.\nPart Type: ${typeof part}\nPart Value: ${JSON.stringify(
+          part
+        )}`
+      )
       break
     } catch (e) {
       console.group()
@@ -103,39 +111,47 @@ const getAncestors = (props) => {
   console.log('Final Value:')
   console.log(current)
 
-  if(current !== props.value) {
-    console.error(`Warning: Final Value of ${JSON.stringify(current)} !== props.value of ${JSON.stringify(props.value)}`)
-    if(current !== props.compareValue) {
-      console.error(`Warning: Final Value of ${JSON.stringify(current)} !== props.compareValue of ${JSON.stringify(props.compareValue)}`)
+  if (current !== props.value) {
+    console.error(
+      `Warning: Final Value of ${JSON.stringify(current)} !== props.value of ${JSON.stringify(
+        props.value
+      )}`
+    )
+    if (current !== props.compareValue) {
+      console.error(
+        `Warning: Final Value of ${JSON.stringify(
+          current
+        )} !== props.compareValue of ${JSON.stringify(props.compareValue)}`
+      )
     }
   }
   console.groupEnd('Output')
 
   console.log('Finished.')
   console.groupEnd('getAncenstors')
-  return { ancestors, final: current }
+  return {ancestors, final: current}
 }
 
-function validateAncestor( wasSet, ancestor ) {
-  if(wasSet) {
-    if(ancestor === undefined || ancestor === null || ancestor === '') {
-      return { error: true, errorMsg: 'ancestor returned empty' }
+function validateAncestor(wasSet, ancestor) {
+  if (wasSet) {
+    if (ancestor === undefined || ancestor === null || ancestor === '') {
+      return {error: true, errorMsg: 'ancestor returned empty'}
     }
-    if(typeof(ancestor) == 'object') {
+    if (typeof ancestor == 'object') {
       if (ancestor instanceof Error || ancestor instanceof Function) {
-        return { error: true, errorMsg: `ancestor has type 'Error' or 'Function'`}
+        return {error: true, errorMsg: `ancestor has type 'Error' or 'Function'`}
       }
-      return { error: false}
+      return {error: false}
     }
-    if(ancestor || ancestor === false || ancestor === 0) {
-      return { error: true, errorMsg: 'ancestor not object' }
+    if (ancestor || ancestor === false || ancestor === 0) {
+      return {error: true, errorMsg: 'ancestor not object'}
     }
-    return { error: true, errorMsg: 'unhandled falsy case' }
+    return {error: true, errorMsg: 'unhandled falsy case'}
   }
-  return { error: true, errorMsg: 'ancestor was never set' }
+  return {error: true, errorMsg: 'ancestor was never set'}
 }
 
 export default {
   getAncestors,
-  getAncestor
+  getAncestor,
 }
