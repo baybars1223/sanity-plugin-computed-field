@@ -18,8 +18,9 @@ import DefaultFormField from 'part:@sanity/components/formfields/default'
 // import styles from './ComputedField.css'
 import PatchEvent, {set, unset} from 'part:@sanity/form-builder/patch-event'
 
-//TODO: fix import typing
-import recomputeHelpers from './recompute.js'
+//TODO: convert recompute.js to typescript
+const recomputeHelpers = require('./recompute.js')
+
 type SanityType = {
   _type?: string
   title: string
