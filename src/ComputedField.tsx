@@ -29,7 +29,8 @@ type SanityType = {
     buttonText?: string
     editable?: boolean
     ancestorDepth: number
-    //TODO: fix type signature
+    //TODO: Is there a reason it only has `number | string | null`, not `boolean`?
+    // Does Sanity use strings under the hood for booleans? I don't remember
     recomputeHandler: (result: {[s: string]: any}) => number | string | null
     [s: string]: any
   }
@@ -42,9 +43,11 @@ export type SanityProps = {
   readOnly?: boolean
   markers: Marker[]
   value?: unknown
+  compareValue?: unknown
   level?: number
   onFocus: (pathOrEvent?: Path | React.FocusEvent<any>) => void
   onChange: (ev: any) => void
+  getValuePath: () => Path
 }
 
 const validateConfiguration = (options: SanityType['options']) => {
@@ -80,14 +83,11 @@ const validateConfiguration = (options: SanityType['options']) => {
 const ComputedField: React.FC<SanityProps> = React.forwardRef(
   (props: SanityProps, forwardedRef: React.ForwardedRef<HTMLInputElement>) => {
     const {type, level, onFocus, value, markers} = props
-    const document = props.document
     const errors = React.useMemo(() => markers.filter(isValidationErrorMarker), [markers])
     const [loading, setLoading] = React.useState(false)
-    const {_id, _type}: SanityDocument = document
     const options = props.type.options
     validateConfiguration(options)
     const handleRecompute = React.useCallback(
-      //TODO: fix type signature
       (result: {[s: string]: unknown}) => options.recomputeHandler(result),
       [options.recomputeHandler]
     )
@@ -124,7 +124,7 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
         }
         setLoading(false)
       },
-      [handleChange, handleRecompute, value, _id, _type]
+      [handleChange, handleRecompute, value, props, options.ancestorDepth]
     )
     let TextComponent = type.name === 'text' ? TextArea : TextInput
     return (
@@ -159,6 +159,7 @@ const ComputedField: React.FC<SanityProps> = React.forwardRef(
             <Button
               mode="ghost"
               type="button"
+              // `event: MouseEvent`? Not actually using it so leaving it as any
               onClick={(event: any) => recompute(event, props)}
               onFocus={onFocus}
               text={options.buttonText || 'Regenerate'}
