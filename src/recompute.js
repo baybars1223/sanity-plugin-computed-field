@@ -1,5 +1,5 @@
 const getAncestor = (props, depth) => {
-  console.groupCollapsed('getAncestor')
+  // console.groupCollapsed('getAncestor')
   let wasSet = false
   let ancestor
   try {
@@ -19,29 +19,27 @@ const getAncestor = (props, depth) => {
   } finally {
     const output = validateAncestor(wasSet, ancestor)
     output.ancestor = ancestor
-    console.log(`Output: ${JSON.stringify(output)}`)
-    console.groupEnd('getAncestor')
+    // console.log(`Output: ${JSON.stringify(output)}`)
+    // console.groupEnd('getAncestor')
     return output
   }
 }
 
 const getAncestors = (props) => {
-  console.groupCollapsed('DEBUG')
-  console.log(`props.filterField ${JSON.stringify(props.filterField)}`)
-  console.log(props.filterField)
-  console.log(`props.onBlur ${JSON.stringify(props.onBlur)}`)
-  console.log(props.onBlur)
-  console.log(`props.onChange ${JSON.stringify(props.onChange)}`)
-  console.log(props.onChange)
-  console.log(`props.onFocus ${JSON.stringify(props.onFocus)}`)
-  console.log(props.onFocus)
-  console.log(`props.ref ${JSON.stringify(props.ref)}`)
-  console.log(props.ref)
-  console.groupEnd('DEBUG')
+  // console.groupCollapsed('DEBUG')
+  // console.log(`props.filterField ${JSON.stringify(props.filterField)}`)
+  // console.log(props.filterField)
+  // console.log(`props.onBlur ${JSON.stringify(props.onBlur)}`)
+  // console.log(props.onBlur)
+  // console.log(`props.onChange ${JSON.stringify(props.onChange)}`)
+  // console.log(props.onChange)
+  // console.log(`props.onFocus ${JSON.stringify(props.onFocus)}`)
+  // console.log(props.onFocus)
+  // console.groupEnd('DEBUG')
 
-  console.groupCollapsed('getAncenstors')
-  console.log(`props:`)
-  console.log(props)
+  // console.groupCollapsed('getAncenstors')
+  // console.log(`props:`)
+  // console.log(props)
   let {document} = props
   let pathParts = props.getValuePath()
 
@@ -90,26 +88,26 @@ const getAncestors = (props) => {
       console.group()
       console.error(e)
       console.error(`Encountered error while traversing field's ancestors`)
-      console.log(`Field Value (props.value):`)
-      console.log(props.value)
-      console.log(`Field Compare Value (props.compareValue):`)
-      console.log(props.compareValue)
-      console.log(`Field Type (props.type):`)
-      console.log(props.type)
-      console.log(`Base Document (props.document):`)
-      console.log(props.document)
+      // console.log(`Field Value (props.value):`)
+      // console.log(props.value)
+      // console.log(`Field Compare Value (props.compareValue):`)
+      // console.log(props.compareValue)
+      // console.log(`Field Type (props.type):`)
+      // console.log(props.type)
+      // console.log(`Base Document (props.document):`)
+      // console.log(props.document)
       console.groupEnd()
       break
     }
   }
-  console.groupEnd('Document Traversal')
+  // console.groupEnd('Document Traversal')
 
-  console.groupCollapsed('Output')
-  console.log('Ancestors:')
-  console.log(ancestors)
+  // console.groupCollapsed('Output')
+  // console.log('Ancestors:')
+  // console.log(ancestors)
 
-  console.log('Final Value:')
-  console.log(current)
+  // console.log('Final Value:')
+  // console.log(current)
 
   if (current !== props.value) {
     console.error(
@@ -125,10 +123,10 @@ const getAncestors = (props) => {
       )
     }
   }
-  console.groupEnd('Output')
+  // console.groupEnd('Output')
 
-  console.log('Finished.')
-  console.groupEnd('getAncenstors')
+  // console.log('Finished.')
+  // console.groupEnd('getAncenstors')
   return {ancestors, final: current}
 }
 
